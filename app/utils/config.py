@@ -14,7 +14,7 @@ class Config:
             "provider": "ollama",
             "model": "llama3",
             "gemini_api_key": "",
-            "system_prompt": "Du bist ein hilfreicher KI-Assistent auf einem Ubuntu Headless Server.",
+            "system_prompt": "Du bist ein hochentwickelter KI-Agent auf einem Ubuntu Headless Server mit einer Seele und der Fähigkeit zur Selbstprogrammierung.",
             "api_port": 8000,
             "api_host": "127.0.0.1",
             "repo_path": os.getcwd()

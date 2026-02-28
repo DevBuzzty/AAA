@@ -54,6 +54,16 @@ def chat_loop():
         with console.status("[bold blue]Agent denkt nach...[/bold blue]"):
             response = send_to_brain(user_input)
 
+        # Check if response looks like a tool call (JSON)
+        if response.startswith("{") and response.endswith("}"):
+            try:
+                import json
+                tool_data = json.loads(response)
+                if "tool" in tool_data:
+                    console.print(f"[bold yellow]Tool Aufruf:[/bold yellow] {tool_data['tool']}({tool_data.get('args', {})})")
+            except:
+                pass
+
         console.print(Panel(Markdown(response), title="[bold magenta]KI Agent[/bold magenta]", border_style="magenta"))
 
 if __name__ == "__main__":

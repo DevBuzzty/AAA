@@ -6,15 +6,17 @@ import os
 import signal
 import subprocess
 
-from app.core.manager import LLMManager
+from app.core.manager import Agent
 from app.core.ollama_provider import OllamaProvider
 from app.core.gemini_provider import GeminiProvider
+from app.core.memory import Memory
 from app.utils.config import Config
 
 app = FastAPI(title="AI Agent Brain")
 config = Config()
+memory = Memory()
 
-# LLM Manager Setup
+# LLM Provider Setup
 def get_provider():
     provider_name = config.get("provider", "ollama")
     model_name = config.get("model", "llama3")
@@ -27,7 +29,8 @@ def get_provider():
     else:
         raise ValueError(f"Unknown provider: {provider_name}")
 
-llm_manager = LLMManager(get_provider())
+# Use the advanced Agent instead of simple Manager
+agent = Agent(get_provider(), memory)
 
 class ChatRequest(BaseModel):
     message: str
@@ -47,7 +50,9 @@ def get_status():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
-        response = llm_manager.ask(request.message, request.system_prompt)
+        # Get base system prompt from config or request
+        base_prompt = request.system_prompt or config.get("system_prompt")
+        response = agent.ask(request.message, base_prompt)
         return ChatResponse(response=response)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -84,7 +89,7 @@ async def restart():
 
 @app.post("/clear")
 def clear_history():
-    llm_manager.clear_history()
+    agent.clear_history()
     return {"status": "History cleared"}
 
 def start_server():

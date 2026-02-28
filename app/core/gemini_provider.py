@@ -5,7 +5,6 @@ from .provider import LLMProvider
 class GeminiProvider(LLMProvider):
     """
     Implementation of LLMProvider for Google Gemini API.
-    Requires the 'google-generativeai' Python package.
     """
     def __init__(self, api_key: str, model_name: str = "gemini-1.5-flash"):
         self.api_key = api_key
@@ -13,29 +12,33 @@ class GeminiProvider(LLMProvider):
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel(model_name)
 
-    def _convert_messages(self, messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    def _convert_messages(self, messages: List[Dict[str, str]]):
         """
         Converts generic message formats into Gemini's format.
-        Gemini uses 'user' and 'model' as roles.
-        Note: The very first message can be a system prompt handled separately.
+        Handles system messages by prepending them to the user context
+        or using Gemini's system_instruction if available.
         """
-        gemini_messages = []
+        gemini_msgs = []
+        system_content = ""
+
         for msg in messages:
             role = msg['role']
             content = msg['content']
             if role == "system":
-                 # In a more advanced version, we'd initialize the model with a system_instruction.
-                 # For simplicity, we just append it as a user message or ignore it if not handled by standard GenAI chat.
-                 continue
+                system_content += content + "\n"
+                continue
 
             gemini_role = "user" if role == "user" else "model"
-            gemini_messages.append({"role": gemini_role, "parts": [content]})
-        return gemini_messages
+            # If we had a system prompt, prepend it to the first user message
+            if system_content and gemini_role == "user" and not gemini_msgs:
+                content = f"SYSTEM INSTRUCTIONS:\n{system_content}\n\nUSER MESSAGE:\n{content}"
+                system_content = "" # Reset so we don't prepend again
+
+            gemini_msgs.append({"role": gemini_role, "parts": [content]})
+        return gemini_msgs
 
     def generate_response(self, messages: List[Dict[str, str]], **kwargs) -> str:
         try:
-            # For simplicity, using the direct generate_content approach
-            # instead of stateful chat (which LLMManager handles manually).
             gemini_msgs = self._convert_messages(messages)
             response = self.model.generate_content(gemini_msgs)
             return response.text
@@ -52,5 +55,4 @@ class GeminiProvider(LLMProvider):
              yield f"Error in Gemini stream: {str(e)}"
 
     def get_available_models(self) -> List[str]:
-         # For simplicity, returning common models. Fetching from API requires more calls.
          return ["gemini-1.5-flash", "gemini-1.5-pro"]
