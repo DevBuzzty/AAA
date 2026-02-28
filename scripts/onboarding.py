@@ -27,6 +27,16 @@ def run_onboarding():
             default="llama3"
         ).ask()
         config.set("model", model_name)
+
+        # Automatisch das Modell pullen
+        print(f"Prüfe/Pulle Ollama-Modell: {model_name}...")
+        try:
+            import ollama
+            ollama.pull(model_name)
+            print(f"Modell {model_name} ist bereit.")
+        except Exception as e:
+            print(f"Warnung: Konnte Modell {model_name} nicht automatisch pullen. Bitte manuell 'ollama pull {model_name}' ausführen. Fehler: {e}")
+
     else:
         api_key = questionary.password("Gib deinen Google Gemini API Key ein:").ask()
         config.set("gemini_api_key", api_key)

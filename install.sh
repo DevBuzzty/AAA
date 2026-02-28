@@ -14,6 +14,8 @@ if ! command -v ollama >/dev/null 2>&1; then
     curl -fsSL https://ollama.com/install.sh | sh
     # Ollama Dienst starten (falls noch nicht geschehen)
     sudo systemctl enable --now ollama
+    echo "Warte auf Ollama Dienst..."
+    sleep 5
 else
     echo "Ollama ist bereits installiert."
 fi
