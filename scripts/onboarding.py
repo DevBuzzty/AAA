@@ -24,7 +24,7 @@ def run_onboarding():
     # 2. Modell Auswahl
     if provider == "ollama":
         model_name = questionary.text(
-            "Welches Ollama-Modell soll standardmäßig verwendet werden (z. B. llama3, mistral)?",
+            "Welches Ollama-Modell soll standardmäßig verwendet werden (Empfehlung: llama3:8b-instruct-q4_K_M für Performance)?",
             default="llama3"
         ).ask()
         config.set("model", model_name)

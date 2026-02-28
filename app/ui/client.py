@@ -63,12 +63,15 @@ def chat_loop():
         from rich.live import Live
         with Live(console=console, refresh_per_second=10) as live:
             for chunk in send_to_brain_stream(user_input):
-                # Suppress tech markers (starting with [System: ]) for cleaner output
-                if "[System:" in chunk:
+                # Suppress technical markers and raw JSON fragments in final output
+                if "[System:" in chunk or '{"tool":' in chunk:
                     continue
 
                 full_response += chunk
-                live.update(Panel(Markdown(full_response), title="[bold magenta]Arch[/bold magenta]", border_style="magenta"))
+                # Avoid displaying raw braces as much as possible if they appear in chunks
+                display_response = full_response.strip()
+                if display_response:
+                    live.update(Panel(Markdown(display_response), title="[bold magenta]Arch[/bold magenta]", border_style="magenta"))
 
 if __name__ == "__main__":
     chat_loop()

@@ -12,9 +12,9 @@ class OllamaProvider(LLMProvider):
 
     def generate_response(self, messages: List[Dict[str, str]], **kwargs) -> str:
         try:
-            # Set keep_alive to 0 to unload model immediately after response (saves RAM/CPU)
+            # Set keep_alive to 5m to avoid constant reloading (saves CPU on repeated requests)
             options = kwargs.pop("options", {})
-            response = ollama.chat(model=self.model_name, messages=messages, options=options, keep_alive=0, **kwargs)
+            response = ollama.chat(model=self.model_name, messages=messages, options=options, keep_alive="5m", **kwargs)
             return response['message']['content']
         except Exception as e:
             return f"Error in Ollama generation: {str(e)}"
@@ -22,7 +22,7 @@ class OllamaProvider(LLMProvider):
     def stream_response(self, messages: List[Dict[str, str]], **kwargs) -> Generator[str, None, None]:
         try:
             options = kwargs.pop("options", {})
-            stream = ollama.chat(model=self.model_name, messages=messages, stream=True, options=options, keep_alive=0, **kwargs)
+            stream = ollama.chat(model=self.model_name, messages=messages, stream=True, options=options, keep_alive="5m", **kwargs)
             for chunk in stream:
                 yield chunk['message']['content']
         except Exception as e:
