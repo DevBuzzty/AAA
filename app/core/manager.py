@@ -39,9 +39,14 @@ class Agent:
     def stream(self, user_input: str, base_system_prompt: str):
         """
         Streaming version of ask() for better user experience.
+        Optimized to handle long history (max 10 messages) to save RAM/CPU.
         """
         system_prompt = self._get_system_prompt(base_system_prompt)
-        messages = [{"role": "system", "content": system_prompt}] + self.history + [{"role": "user", "content": user_input}]
+
+        # Keep only the last 10 messages for context efficiency
+        context_history = self.history[-10:]
+        messages = [{"role": "system", "content": system_prompt}] + context_history + [{"role": "user", "content": user_input}]
+
         self.history.append({"role": "user", "content": user_input})
 
         full_response = ""
