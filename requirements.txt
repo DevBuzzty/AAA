@@ -1,0 +1,8 @@
+ollama
+google-generativeai
+fastapi
+uvicorn
+requests
+rich
+questionary
+pydantic

@@ -1,0 +1,58 @@
+import questionary
+import os
+import sys
+from app.utils.config import Config
+
+def run_onboarding():
+    """
+    Interactive onboarding script for setting up the AI agent.
+    Collects API keys, selects model and provider, etc.
+    """
+    config = Config()
+
+    print("Willkommen zum AI Agent Onboarding!")
+    print("-----------------------------------")
+
+    # 1. LLM Provider Auswahl
+    provider = questionary.select(
+        "Wähle deinen primären LLM Provider:",
+        choices=["ollama", "gemini"]
+    ).ask()
+    config.set("provider", provider)
+
+    # 2. Modell Auswahl
+    if provider == "ollama":
+        model_name = questionary.text(
+            "Welches Ollama-Modell soll standardmäßig verwendet werden (z. B. llama3, mistral)?",
+            default="llama3"
+        ).ask()
+        config.set("model", model_name)
+    else:
+        api_key = questionary.password("Gib deinen Google Gemini API Key ein:").ask()
+        config.set("gemini_api_key", api_key)
+        model_name = questionary.select(
+            "Wähle ein Gemini-Modell:",
+            choices=["gemini-1.5-flash", "gemini-1.5-pro"]
+        ).ask()
+        config.set("model", model_name)
+
+    # 3. Pfade
+    repo_path = questionary.text(
+        "Pfad zum Repository (für Updates):",
+        default=os.getcwd()
+    ).ask()
+    config.set("repo_path", repo_path)
+
+    # 4. System Prompt
+    system_prompt = questionary.text(
+        "Gib einen Standard-System-Prompt für den Agenten ein:",
+        default="Du bist ein hilfreicher KI-Assistent auf einem Ubuntu Headless Server."
+    ).ask()
+    config.set("system_prompt", system_prompt)
+
+    config.save()
+    print("-----------------------------------")
+    print("Onboarding abgeschlossen! Die Einstellungen wurden gespeichert.")
+
+if __name__ == "__main__":
+    run_onboarding()

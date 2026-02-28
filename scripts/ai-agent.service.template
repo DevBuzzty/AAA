@@ -1,0 +1,16 @@
+[Unit]
+Description=AI Agent Brain Service
+After=network.target ollama.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/ai-agent
+ExecStart=/opt/ai-agent/venv/bin/python -m app.api.brain
+Restart=always
+RestartSec=5
+Environment=PYTHONPATH=/opt/ai-agent
+
+[Install]
+WantedBy=multi-user.target
