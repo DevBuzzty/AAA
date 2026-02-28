@@ -13,13 +13,18 @@ config = Config()
 
 BRAIN_URL = f"http://{config.get('api_host', '127.0.0.1')}:{config.get('api_port', 8000)}"
 
-def send_to_brain(message: str) -> str:
+def send_to_brain_stream(message: str):
+    """
+    Consumes the streaming response from the Brain.
+    """
     try:
-        response = requests.post(f"{BRAIN_URL}/chat", json={"message": message})
-        response.raise_for_status()
-        return response.json()["response"]
+        with requests.post(f"{BRAIN_URL}/chat", json={"message": message}, stream=True) as response:
+            response.raise_for_status()
+            for chunk in response.iter_content(chunk_size=None, decode_unicode=True):
+                if chunk:
+                    yield chunk
     except Exception as e:
-        return f"Fehler bei der Verbindung zum Brain: {str(e)}"
+        yield f"Fehler bei der Verbindung zum Brain: {str(e)}"
 
 def update_brain():
     try:
@@ -51,20 +56,15 @@ def chat_loop():
              console.print("[yellow]Chat-Verlauf gelöscht.[/yellow]")
              continue
 
-        with console.status("[bold blue]Agent denkt nach...[/bold blue]"):
-            response = send_to_brain(user_input)
+        console.print(Panel("", title="[bold magenta]Arch[/bold magenta]", border_style="magenta"), end="")
 
-        # Check if response looks like a tool call (JSON)
-        if response.startswith("{") and response.endswith("}"):
-            try:
-                import json
-                tool_data = json.loads(response)
-                if "tool" in tool_data:
-                    console.print(f"[bold yellow]Tool Aufruf:[/bold yellow] {tool_data['tool']}({tool_data.get('args', {})})")
-            except:
-                pass
-
-        console.print(Panel(Markdown(response), title="[bold magenta]KI Agent[/bold magenta]", border_style="magenta"))
+        full_response = ""
+        # Create a live display for streaming
+        from rich.live import Live
+        with Live(console=console, refresh_per_second=10) as live:
+            for chunk in send_to_brain_stream(user_input):
+                full_response += chunk
+                live.update(Panel(Markdown(full_response), title="[bold magenta]Arch[/bold magenta]", border_style="magenta"))
 
 if __name__ == "__main__":
     chat_loop()

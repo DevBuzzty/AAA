@@ -7,14 +7,13 @@ from app.core.provider import LLMProvider
 class TestLLMManager(unittest.TestCase):
     def test_ask_adds_to_history(self):
         mock_provider = MagicMock(spec=LLMProvider)
-        mock_provider.generate_response.return_value = "Hallo!"
+        mock_provider.stream_response.return_value = iter(["Hallo!"])
 
         memory = Memory()
         manager = Agent(mock_provider, memory)
         response = manager.ask("Hi", "System")
 
         self.assertEqual(response, "Hallo!")
-        # Agent.ask adds 1 to history (user input). Assistant response is added by ask().
         self.assertEqual(len(manager.history), 2)
         self.assertEqual(manager.history[0]["role"], "user")
         self.assertEqual(manager.history[1]["role"], "assistant")

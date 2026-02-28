@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Optional, Any
 import os
@@ -59,13 +60,27 @@ def get_status():
         "model": config.get("model")
     }
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat")
 async def chat(request: ChatRequest):
+    """
+    Refactored to support streaming for better performance/latency.
+    """
     try:
-        # Get base system prompt from config or request
-        base_prompt = request.system_prompt or config.get("system_prompt")
-        response = agent.ask(request.message, base_prompt)
-        return ChatResponse(response=response)
+        # Load default prompt from file if not specified in request
+        try:
+            with open("app/utils/default_system_prompt.txt", "r") as f:
+                default_prompt = f.read()
+        except:
+            default_prompt = config.get("system_prompt")
+
+        base_prompt = request.system_prompt or default_prompt
+
+        # Generator for streaming the response
+        def generate():
+            for chunk in agent.stream(request.message, base_prompt):
+                yield chunk
+
+        return StreamingResponse(generate(), media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

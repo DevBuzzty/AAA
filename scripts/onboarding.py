@@ -46,7 +46,12 @@ def run_onboarding():
         ).ask()
         config.set("model", model_name)
 
-    # 3. Pfade
+    # 3. Brave Search API
+    brave_key = questionary.password("Gib deinen Brave Search API Key ein (optional):").ask()
+    if brave_key:
+        config.set("brave_api_key", brave_key)
+
+    # 4. Pfade
     repo_path = questionary.text(
         "Pfad zum Repository (für Updates):",
         default=os.getcwd()
