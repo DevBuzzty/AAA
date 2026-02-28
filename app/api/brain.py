@@ -32,6 +32,18 @@ def get_provider():
 # Use the advanced Agent instead of simple Manager
 agent = Agent(get_provider(), memory)
 
+@app.on_event("startup")
+async def startup_event():
+    """Ensure the selected Ollama model is available on startup."""
+    provider_name = config.get("provider", "ollama")
+    if provider_name == "ollama":
+        model_name = config.get("model", "llama3")
+        print(f"Startup: Checking Ollama model '{model_name}'...")
+        try:
+            subprocess.run(["ollama", "pull", model_name], check=True)
+        except Exception as e:
+            print(f"Startup warning: Could not verify Ollama model '{model_name}': {e}")
+
 class ChatRequest(BaseModel):
     message: str
     system_prompt: Optional[str] = None

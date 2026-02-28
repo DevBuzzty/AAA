@@ -1,6 +1,6 @@
-# AI Agent - Ubuntu Headless Terminal Chatbot
+# Arch - Ubuntu Headless AI Agent
 
-Ein modularer, erweiterbarer KI-Agent mit lokaler Ollama-Unterstützung und Google Gemini API-Anbindung.
+Arch ist ein modularer, erweiterbarer KI-Agent mit lokaler Ollama-Unterstützung und Google Gemini API-Anbindung. Er verfügt über ein Gedächtnis, Werkzeuge zur Systeminteraktion und die Fähigkeit zur Selbstprogrammierung.
 
 ## Features
 - **Strategy Pattern:** Einfaches Umschalten zwischen Ollama und Gemini (weitere Provider leicht hinzufügbar).
@@ -11,12 +11,21 @@ Ein modularer, erweiterbarer KI-Agent mit lokaler Ollama-Unterstützung und Goog
 
 ## Schnelles Setup (One-Liner)
 
-Um den Agenten auf einem frischen Ubuntu Headless Server zu installieren:
+Um Arch auf einem frischen Ubuntu Headless Server zu installieren:
 
 ```bash
-# Ersetze <REPO_URL> durch den tatsächlichen GitHub-Link
-git clone <REPO_URL> ai-agent && cd ai-agent && bash install.sh
+git clone https://github.com/DevBuzzty/AAA.git arch && cd arch && bash install.sh
 ```
+
+## CLI Bedienung (arch)
+Nach der Installation steht der Befehl `arch` systemweit zur Verfügung:
+
+- `arch chat`: Startet das interaktive Terminal-Interface.
+- `arch update`: Zieht den neuesten Code von GitHub und startet den Dienst neu.
+- `arch onboarding`: Startet die Konfiguration neu (Modellwahl, API-Keys).
+- `arch pull <model>`: Lädt ein spezifisches Modell für Ollama herunter.
+- `arch status`: Zeigt den Status des Hintergrunddienstes.
+- `arch restart`: Startet den Dienst manuell neu.
 
 ## Manuelle Installation
 

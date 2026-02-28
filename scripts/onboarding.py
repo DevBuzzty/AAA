@@ -1,6 +1,7 @@
 import questionary
 import os
 import sys
+import subprocess
 from app.utils.config import Config
 
 def run_onboarding():
@@ -28,11 +29,10 @@ def run_onboarding():
         ).ask()
         config.set("model", model_name)
 
-        # Automatisch das Modell pullen
+        # Automatisch das Modell pullen via Subprocess (robuster gegen Library-Issues)
         print(f"Prüfe/Pulle Ollama-Modell: {model_name}...")
         try:
-            import ollama
-            ollama.pull(model_name)
+            subprocess.run(["ollama", "pull", model_name], check=True)
             print(f"Modell {model_name} ist bereit.")
         except Exception as e:
             print(f"Warnung: Konnte Modell {model_name} nicht automatisch pullen. Bitte manuell 'ollama pull {model_name}' ausführen. Fehler: {e}")
